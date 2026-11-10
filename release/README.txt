@@ -1,4 +1,4 @@
-Roaming Fish Previews v0.14.0
+Roaming Fish Previews v0.15.0
 
 Requirements:
 - STORY OF SEASONS: Grand Bazaar (Steam)
@@ -8,7 +8,7 @@ Install:
 1. Close the game.
 2. Extract this archive into the game directory.
 3. Merge the included BepInEx folder when prompted.
-4. Start the game and check BepInEx/LogOutput.log for version 0.14.0.
+4. Start the game and check BepInEx/LogOutput.log for version 0.15.0.
 
 Uninstall:
 Delete BepInEx/plugins/RoamingFishPreviews and

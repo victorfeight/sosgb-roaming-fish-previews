@@ -144,9 +144,14 @@ Native analysis and the 0.7.0 runtime exception show that the rod action calls
 `FishWaitingStart` independently; suppressing `LotteryFish` therefore let the
 state advance with a null `decideFish`. Version 0.14.0 lets the lottery complete
 immediately and supplies the reserved row, making `decideFish` valid. Strict
-mode holds only `DecideFish`—the actual transition from waiting to a bite—until
-the pursuing fish reaches the bobber. An off-target cast therefore has a valid
-internal waiting row but cannot bite and remains natively cancelable. Every
+mode retains `DecideFish` as a final safety gate, but native disassembly exposed
+an important caller-side detail: `PlayerActionFishingRod.UpdateAction` continues
+into its bite animation after invoking `DecideFish`, even when a Harmony prefix
+skips that callee. Version 0.15.0 therefore parks the rod's `fishingHitTimer`
+below `fishingHitTime` until the pursuing visible fish reaches its final bite,
+then releases that same native transition. An off-target cast has a valid
+internal waiting row, never enters the phantom catch sequence, and remains
+natively cancelable. Every
 matching lottery call receives the reservation until the lifecycle finishes.
 The reservation remains fixed for the cast. Version 0.14.0 holds `DecideFish`
 through 1-3 visible approach/retreat test nibbles, hides the silhouette, and

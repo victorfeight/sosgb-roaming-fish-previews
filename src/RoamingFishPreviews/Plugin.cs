@@ -16,7 +16,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string PluginGuid = "com.vic.sosgb.roamingfishpreviews";
     public const string PluginName = "Roaming Fish Previews";
-    public const string PluginVersion = "0.14.0";
+    public const string PluginVersion = "0.15.0";
 
     private sealed class ExtractedMeshData
     {
@@ -2342,6 +2342,27 @@ public sealed class Plugin : BasePlugin
                 $"TARGET bite committed item={_reservedMaster.ItemId}; silhouette hidden for splash/result."
             );
             return true;
+        }
+
+        [HarmonyPatch(typeof(PlayerActionFishingRod), "UpdateAction")]
+        [HarmonyPrefix]
+        private static void PlayerUpdateActionPrefix(PlayerActionFishingRod __instance)
+        {
+            if (!_fishingActive || !_strictFiniteMode.Value)
+                return;
+
+            // UpdateAction owns the hidden timer which calls DecideFish. Merely
+            // rejecting DecideFish is too late: its caller continues into the
+            // bite/catch animation after the skipped call. Keep the timer below
+            // its threshold until a visible finite fish completes its final
+            // nibble, then make that same native transition immediately.
+            if (_reservedPreview == null || !_reservedPreview.FinalBiteReady)
+            {
+                __instance.fishingHitTimer = 0f;
+                return;
+            }
+
+            __instance.fishingHitTimer = __instance.fishingHitTime + 0.01f;
         }
 
         [HarmonyPatch(typeof(FishManager), nameof(FishManager.ForceFishingEnd))]

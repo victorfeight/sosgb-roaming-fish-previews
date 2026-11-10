@@ -13,7 +13,7 @@ shadows without changing the game's inventory or save files.
 - Lets fast fishing gradually drain a pond, followed by slow staggered recovery
 - Makes the nearest eligible shadow pursue the bobber and become the actual catch
 - Adds 1-3 visible test nibbles before the final native bite
-- Keeps off-target casts waiting and safely cancelable in strict finite mode
+- Keeps off-target casts waiting and safely cancelable, with no phantom catch animation
 - Scatters nearby fish when one notices a hook
 - Scatters shoreline fish when the player runs, while walking remains quiet
 - Applies a head-anchored, speed- and turn-responsive spine bend to writable meshes
@@ -33,10 +33,10 @@ The old `BepInEx 6.0.0-pre.1` release is not suitable for this Unity 6 game.
 
 1. Close the game.
 2. Install and initialize BepInEx 6 Unity IL2CPP if it is not already installed.
-3. Download `RoamingFishPreviews-v0.14.0.zip` from Releases.
+3. Download `RoamingFishPreviews-v0.15.0.zip` from Releases.
 4. Extract the ZIP into the game directory so the included `BepInEx` folder
    merges with the existing one.
-5. Start the game and confirm `Roaming Fish Previews 0.14.0 loaded` appears in
+5. Start the game and confirm `Roaming Fish Previews 0.15.0 loaded` appears in
    `BepInEx/LogOutput.log`.
 
 Removing `BepInEx/plugins/RoamingFishPreviews` and the corresponding config file

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0
+
+- Fixed off-target casts entering a phantom catch animation with no visible bite
+- Parked the rod's native bite timer until a finite fish completes its final nibble
+- Preserved the valid internal lottery row and native cancel/reel-in lifecycle
+
 ## 0.14.0
 
 - Added finite, connected-pool fish populations with staggered recovery
