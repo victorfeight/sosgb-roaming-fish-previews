@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>RoamingFishPreviews</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GameDirectory Condition="'$(GameDirectory)' == '' and Exists('/mnt/c/Program Files (x86)/Steam/steamapps/common/STORY OF SEASONS Grand Bazaar')">/mnt/c/Program Files (x86)/Steam/steamapps/common/STORY OF SEASONS Grand Bazaar</GameDirectory>
+    <GameDirectory Condition="'$(GameDirectory)' == ''">C:\Program Files (x86)\Steam\steamapps\common\STORY OF SEASONS Grand Bazaar</GameDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx.Core" HintPath="$(GameDirectory)/BepInEx/core/BepInEx.Core.dll" Private="false" />
+    <Reference Include="BepInEx.Unity.IL2CPP" HintPath="$(GameDirectory)/BepInEx/core/BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(GameDirectory)/BepInEx/core/0Harmony.dll" Private="false" />
+    <Reference Include="Il2CppInterop.Runtime" HintPath="$(GameDirectory)/BepInEx/core/Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="Il2Cppmscorlib" HintPath="$(GameDirectory)/BepInEx/interop/Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath="$(GameDirectory)/BepInEx/interop/Assembly-CSharp.dll" Private="false" />
+    <Reference Include="BokuMono.Utility" HintPath="$(GameDirectory)/BepInEx/interop/BokuMono.Utility.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(GameDirectory)/BepInEx/interop/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AnimationModule" HintPath="$(GameDirectory)/BepInEx/interop/UnityEngine.AnimationModule.dll" Private="false" />
+    <Reference Include="UnityEngine.PhysicsModule" HintPath="$(GameDirectory)/BepInEx/interop/UnityEngine.PhysicsModule.dll" Private="false" />
+  </ItemGroup>
+</Project>

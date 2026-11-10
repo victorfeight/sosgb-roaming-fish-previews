@@ -1,0 +1,23 @@
+# Local game-derived work files
+meshes/
+extracted/
+provenance/
+backups/
+*.rfmesh
+
+# Build output
+**/bin/
+**/obj/
+__pycache__/
+*.pyc
+
+# Release output
+dist/
+*.zip
+*.7z
+
+# Local IDE state
+.vs/
+.vscode/
+*.user
+*.suo
