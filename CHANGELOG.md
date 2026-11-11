@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.2
+
+- Jumping or falling into water scatters fish within 6 metres of the splash
+- Water-height filtering prevents reactions in ponds above or below the landing
+- Added SplashScatterEnabled and SplashScatterRadius settings
+
 ## 0.15.1
 
 - Fish turn toward the bobber before advancing and swim along their facing direction

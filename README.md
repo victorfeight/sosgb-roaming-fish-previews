@@ -7,7 +7,7 @@ and nibble before the game's fishing minigame begins.
 - Finite schools sized to each pool, using the game's fish eligibility rules.
 - Catch the fish you target; empty casts wait until you reel them in.
 - Fish turn toward the bobber and approach headfirst before nibbling.
-- Nearby fish scatter from hooks and running footsteps.
+- Nearby fish scatter from hooks, running footsteps, and jumping into water.
 - Swimming includes body bending, gradual turning, and acceleration.
 - Caught fish recover slowly so you can gradually drain a pond.
 
@@ -15,11 +15,11 @@ and nibble before the game's fishing minigame begins.
 
 1. Install and initialize **BepInEx 6 Unity IL2CPP x64** for the game.
    The old `6.0.0-pre.1` release is unsuitable.
-2. Close the game and download `RoamingFishPreviews-v0.15.1.zip` from
+2. Close the game and download `RoamingFishPreviews-v0.15.2.zip` from
    [Releases](https://github.com/victorfeight/sosgb-roaming-fish-previews/releases).
 3. Extract it into the game directory and merge the `BepInEx` folder.
 
-The log should show `Roaming Fish Previews 0.15.1 loaded`.
+The log should show `Roaming Fish Previews 0.15.2 loaded`.
 Settings are in `BepInEx/config/com.vic.sosgb.roamingfishpreviews.cfg`.
 The preset uses 4-12 fish per pool, up to 18 loaded visuals, and recovery
 of one missing fish per pool every 120 seconds.

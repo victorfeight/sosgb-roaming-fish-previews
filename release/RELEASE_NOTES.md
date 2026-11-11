@@ -1,10 +1,11 @@
-# Roaming Fish Previews v0.15.1
+# Roaming Fish Previews v0.15.2
 
 Fish approach and bite correctness update for the Animal Crossing-inspired fishing
 overhaul for STORY OF SEASONS: Grand Bazaar.
 
 Highlights:
 
+- Jumping or falling into water scatters fish within 6 metres of the splash
 - Fish turn toward the bobber, approach headfirst, and align before nibbling
 - Preserves normal reel input once the final visible nibble is ready
 - Finite, location-accurate schools derived from connected fishing-water cells

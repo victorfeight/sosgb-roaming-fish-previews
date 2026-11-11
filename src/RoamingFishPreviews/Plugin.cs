@@ -16,7 +16,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string PluginGuid = "com.vic.sosgb.roamingfishpreviews";
     public const string PluginName = "Roaming Fish Previews";
-    public const string PluginVersion = "0.15.1";
+    public const string PluginVersion = "0.15.2";
 
     private sealed class ExtractedMeshData
     {
@@ -123,6 +123,8 @@ public sealed class Plugin : BasePlugin
     private static ConfigEntry<float> _runScatterRadius;
     private static ConfigEntry<float> _runScatterCooldown;
     private static ConfigEntry<float> _runScatterMinimumSpeed;
+    private static ConfigEntry<bool> _splashScatterEnabled;
+    private static ConfigEntry<float> _splashScatterRadius;
     private static ConfigEntry<bool> _strictFiniteMode;
     private static ConfigEntry<bool> _verboseTrace;
     private static BepInEx.Logging.ManualLogSource _log;
@@ -221,6 +223,10 @@ public sealed class Plugin : BasePlugin
             "Minimum seconds between running-footstep disturbance pulses.");
         _runScatterMinimumSpeed = Config.Bind("SchoolReaction", "RunScatterMinimumSpeed", 1.75f,
             "Measured movement speed required in addition to the game's native running state.");
+        _splashScatterEnabled = Config.Bind("SchoolReaction", "SplashScatterEnabled", true,
+            "Jumping or falling into water startles nearby fish at the splash position.");
+        _splashScatterRadius = Config.Bind("SchoolReaction", "SplashScatterRadius", 6f,
+            "Splash disturbance radius in metres; fish at other water elevations are excluded.");
         _strictFiniteMode = Config.Bind("Gameplay", "StrictFiniteMode", true,
             "Only a displayed fish reaching the bobber may release the native bite lottery.");
         _verboseTrace = Config.Bind("Diagnostics", "VerboseTrace", false,
@@ -2094,6 +2100,39 @@ public sealed class Plugin : BasePlugin
         );
     }
 
+    private static void ScatterFromWaterLanding(Vector3 waterPosition)
+    {
+        if (!_enabled.Value || !_splashScatterEnabled.Value || !_populationInitialized)
+            return;
+
+        float radius = Mathf.Clamp(_splashScatterRadius.Value, 0f, 10f);
+        if (radius <= 0f)
+            return;
+        int scattered = 0;
+        for (int index = 0; index < Previews.Count; index++)
+        {
+            Preview preview = Previews[index];
+            if (preview.Object == null || !preview.Object.activeInHierarchy ||
+                preview.Pursuing || preview.SwimmingAway ||
+                Math.Abs(preview.WaterPoint.y - waterPosition.y) > 1f ||
+                HorizontalSquared(preview.Object.transform.position, waterPosition) > radius * radius)
+                continue;
+
+            preview.Scattering = true;
+            preview.ScatterThreat = waterPosition;
+            preview.ScatterEndTime = Time.time +
+                Mathf.Clamp(_scatterSeconds.Value, 0.5f, 5f) *
+                (1.2f + 0.3f * (float)PlacementRandom.NextDouble());
+            preview.NextSwimDecision = 0f;
+            ChooseScatterTarget(preview);
+            scattered++;
+        }
+        if (scattered > 0)
+            _log.LogInfo(
+                $"SCHOOL water landing startled {scattered} fish within {radius:0.0}m."
+            );
+    }
+
     private static bool ReservationIsValid(
         uint groupId,
         int toolLevel,
@@ -2277,6 +2316,11 @@ public sealed class Plugin : BasePlugin
 
     private static class Patches
     {
+        [HarmonyPatch(typeof(PlayerCharacter), "DiveIntoWater")]
+        [HarmonyPrefix]
+        private static void PlayerDiveIntoWaterPrefix(RaycastHit waterHit) =>
+            ScatterFromWaterLanding(waterHit.point);
+
         [HarmonyPatch(typeof(FieldManager), "Update")]
         [HarmonyPostfix]
         private static void FieldManagerUpdatePostfix() => TickPopulation();
