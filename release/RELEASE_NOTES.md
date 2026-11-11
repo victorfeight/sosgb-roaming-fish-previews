@@ -1,10 +1,12 @@
-# Roaming Fish Previews v0.15.0
+# Roaming Fish Previews v0.15.1
 
-Finite-bite correctness update for the Animal Crossing-inspired fishing
+Fish approach and bite correctness update for the Animal Crossing-inspired fishing
 overhaul for STORY OF SEASONS: Grand Bazaar.
 
 Highlights:
 
+- Fish turn toward the bobber, approach headfirst, and align before nibbling
+- Preserves normal reel input once the final visible nibble is ready
 - Finite, location-accurate schools derived from connected fishing-water cells
 - Native eligibility lottery and synchronized visible-fish catches
 - Bobber pursuit with visible test nibbles before the final bite

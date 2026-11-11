@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.1
+
+- Fish turn toward the bobber before advancing and swim along their facing direction
+- Approach slows near the bobber; nibbles start from the aligned position without a backward jump
+- Fixed reel input after a valid bite by allowing the native timer to run after the final nibble
+
 ## 0.15.0
 
 - Fixed off-target casts entering a phantom catch animation with no visible bite

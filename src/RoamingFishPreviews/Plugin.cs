@@ -16,7 +16,7 @@ public sealed class Plugin : BasePlugin
 {
     public const string PluginGuid = "com.vic.sosgb.roamingfishpreviews";
     public const string PluginName = "Roaming Fish Previews";
-    public const string PluginVersion = "0.15.0";
+    public const string PluginVersion = "0.15.1";
 
     private sealed class ExtractedMeshData
     {
@@ -74,6 +74,7 @@ public sealed class Plugin : BasePlugin
         public int FakeNibbleCount;
         public float BiteSequenceStart;
         public Vector3 BiteDirection;
+        public Vector3 NibbleRetreatPoint;
         public bool FinalBiteReady;
         public bool SwimmingAway;
         public Vector3 EscapeDirection;
@@ -1468,7 +1469,22 @@ public sealed class Plugin : BasePlugin
                 delta.y = 0f;
                 float distance = delta.magnitude;
                 float biteDistance = Mathf.Clamp(_biteDistance.Value, 0.08f, 0.5f);
-                if (distance <= biteDistance)
+                float retreatDistance = Mathf.Clamp(_nibbleRetreatDistance.Value, 0.10f, 0.55f);
+                float approachDistance = Math.Max(biteDistance, retreatDistance);
+                Vector3 direction = distance > 0.001f ? delta / distance : new Vector3(
+                    Mathf.Sin(preview.Heading * Mathf.Deg2Rad),
+                    0f,
+                    Mathf.Cos(preview.Heading * Mathf.Deg2Rad)
+                );
+                float desiredHeading = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+                preview.Heading = Mathf.MoveTowardsAngle(
+                    preview.Heading,
+                    desiredHeading,
+                    Mathf.Clamp(_swimTurnRate.Value, 30f, 240f) * Time.deltaTime
+                );
+                preview.Object.transform.rotation = Quaternion.Euler(0f, preview.Heading, 0f);
+                float headingError = Math.Abs(Mathf.DeltaAngle(preview.Heading, desiredHeading));
+                if (distance <= approachDistance + 0.015f && headingError <= 3f)
                 {
                     if (!preview.ReachedBobber)
                     {
@@ -1480,6 +1496,7 @@ public sealed class Plugin : BasePlugin
                         );
                         preview.FakeNibbleCount = PlacementRandom.Next(minimum, maximum + 1);
                         preview.BiteSequenceStart = Time.time;
+                        preview.NibbleRetreatPoint = current;
                         preview.BiteDirection = distance > 0.001f
                             ? delta / distance
                             : new Vector3(
@@ -1488,6 +1505,7 @@ public sealed class Plugin : BasePlugin
                                 Mathf.Cos(preview.Heading * Mathf.Deg2Rad)
                             );
                         preview.FinalBiteReady = false;
+                        preview.Velocity = Vector3.zero;
                         _log.LogInfo(
                             $"TARGET reached bobber item={preview.Master.ItemId}; " +
                             $"beginning {preview.FakeNibbleCount} test nibble(s) before final bite."
@@ -1497,18 +1515,29 @@ public sealed class Plugin : BasePlugin
                 }
 
                 float approach = Mathf.Clamp(_approachSpeed.Value, 0.4f, 4f);
-                Vector3 direction = delta / Math.Max(distance, 0.001f);
-                preview.Velocity = Vector3.MoveTowards(
-                    preview.Velocity,
-                    direction * approach,
-                    approach * 1.6f * Time.deltaTime
+                // Face the bobber before advancing. Rebuild velocity along the
+                // fish's current heading so old roaming momentum cannot strafe
+                // it sideways, and ease to a stop at the nibble staging point.
+                float alignment = 1f - Mathf.SmoothStep(0f, 1f, headingError / 60f);
+                float remaining = Math.Max(0f, distance - approachDistance);
+                float desiredSpeed = Math.Min(approach, remaining * 3f) * alignment;
+                float nextSpeed = Mathf.MoveTowards(
+                    preview.Velocity.magnitude,
+                    desiredSpeed,
+                    approach * 2.5f * Time.deltaTime
                 );
+                Vector3 forward = new(
+                    Mathf.Sin(preview.Heading * Mathf.Deg2Rad),
+                    0f,
+                    Mathf.Cos(preview.Heading * Mathf.Deg2Rad)
+                );
+                // A fish facing away pivots first, including casts right beside it.
+                if (headingError >= 60f || remaining <= 0f)
+                    nextSpeed = 0f;
+                nextSpeed = Math.Min(nextSpeed, remaining / Math.Max(Time.deltaTime, 0.001f));
+                preview.Velocity = forward * nextSpeed;
                 Vector3 movement = preview.Velocity * Time.deltaTime;
-                if (movement.magnitude > distance)
-                    movement = direction * distance;
                 preview.Object.transform.position = current + movement;
-                preview.Heading = Mathf.Atan2(direction.x, direction.z) * 57.29578f;
-                preview.Object.transform.rotation = Quaternion.Euler(0f, preview.Heading, 0f);
                 continue;
             }
 
@@ -1865,8 +1894,12 @@ public sealed class Plugin : BasePlugin
 
         Vector3 bitePoint = preview.PursuitTarget +
             new Vector3(0f, _surfaceOffset.Value, 0f);
-        float retreatDistance = Mathf.Clamp(_nibbleRetreatDistance.Value, 0.10f, 0.55f);
-        Vector3 retreatPoint = bitePoint - preview.BiteDirection * retreatDistance;
+        // Begin from the actual aligned approach position, including a cast
+        // which landed beside the fish; never teleport it backward to stage a nibble.
+        Vector3 retreatPoint = preview.NibbleRetreatPoint;
+        // Keep the head aimed down the same axis for every nibble and retreat.
+        preview.Heading = Mathf.Atan2(preview.BiteDirection.x, preview.BiteDirection.z) * Mathf.Rad2Deg;
+        preview.Object.transform.rotation = Quaternion.Euler(0f, preview.Heading, 0f);
         float cycleSeconds = Mathf.Clamp(_nibbleCycleSeconds.Value, 0.45f, 1.5f);
         float elapsed = Math.Max(0f, Time.time - preview.BiteSequenceStart);
         float fakeDuration = preview.FakeNibbleCount * cycleSeconds;
@@ -2357,12 +2390,7 @@ public sealed class Plugin : BasePlugin
             // its threshold until a visible finite fish completes its final
             // nibble, then make that same native transition immediately.
             if (_reservedPreview == null || !_reservedPreview.FinalBiteReady)
-            {
                 __instance.fishingHitTimer = 0f;
-                return;
-            }
-
-            __instance.fishingHitTimer = __instance.fishingHitTime + 0.01f;
         }
 
         [HarmonyPatch(typeof(FishManager), nameof(FishManager.ForceFishingEnd))]

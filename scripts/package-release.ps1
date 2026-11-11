@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$GameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\STORY OF SEASONS Grand Bazaar',
-    [string]$Version = '0.15.0'
+    [string]$Version = '0.15.1'
 )
 
 $ErrorActionPreference = 'Stop'
